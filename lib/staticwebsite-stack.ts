@@ -4,6 +4,8 @@ import s3deploy = require('@aws-cdk/aws-s3-deployment');
 import cloudfront = require('@aws-cdk/aws-cloudfront');
 import iam = require('@aws-cdk/aws-iam');
 import cb = require('@aws-cdk/aws-codebuild');
+import codepipeline = require('@aws-cdk/aws-codepipeline');
+import pipelineAction = require('@aws-cdk/aws-codepipeline-actions');
 
 export class StaticwebsiteStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -22,35 +24,43 @@ export class StaticwebsiteStack extends cdk.Stack {
       destinationKeyPrefix: 'web/static' 
     });
 
-    //create codebuild project to deploy web assets stored in a GitHub repo
-    new cb.Project(this, 'Learning-CDK-project', {
-      environment: {buildImage: cb.LinuxBuildImage.UBUNTU_14_04_NODEJS_10_1_0}, //build environment with NodeJs
-      source: cb.Source.gitHub({
-        owner: 'ccfife', //github ID
-        repo: 'learning-cdk', //github repo
-        webhook: true //rebuild everytime a code change is pushed to this repository
-        //oauthToken: cdk.SecretValue.secretsManager('ccfife_github') //read GitHub access key from Secrets Manager
-      }),
-      buildSpec: cb.BuildSpec.fromObject({
-        version: '0.2',
-        phases: {
-          install: {
-            commands: [
-              'npm install', //install npm dependencies in package.json
-            ],
-          },
-          build: {
-            commands: [
-              'npm run build',  //compile TypeScript to JavaScript
-              'npm run cdk synth -- -o dist' //synthesize CDK app and put results in 'dist'
-            ],
-          },
-        },
-        artifacts: {
-          'files': [ '**/*' ],
-          'base-directory': 'dist'
-        }
-      })
+    //create CodePipeline stages to deploy the static website from GitHub to S3
+    //create the CodePipeline service instance
+    const pipeline = new codepipeline.Pipeline(this, 'CDKpipeline', {
+      pipelineName: 'SonarMasterPipeline'
+    });
+    
+    const sourceOutput = new codepipeline.Artifact();
+
+    //read the GitHub access key from SecretValue using the 'GitHub' name/value pair
+    const token = cdk.SecretValue.secretsManager('ccfife_github', {
+      jsonField: 'GitHub'
+    });
+
+    //create new codepipeline GitHub SOURCE stage
+    const sourceAction = new pipelineAction.GitHubSourceAction({
+      actionName: 'GitHub_Source',
+      owner: 'ccfife',
+      repo: 'staticwebsite',
+      output: sourceOutput,
+      oauthToken: token
+    });
+
+    pipeline.addStage({
+      stageName: 'Source',
+      actions: [sourceAction]
+    })
+
+    //create a new codepipeline DEPLOY stage
+    const deployAction = new pipelineAction.S3DeployAction({
+      actionName: 'S3Deploy',
+      bucket: bucket,
+      input: sourceOutput
+    });
+
+    pipeline.addStage({
+      stageName: 'Deploy',
+      actions: [deployAction]
     });
       
     //create CloudFront access identity
@@ -59,6 +69,7 @@ export class StaticwebsiteStack extends cdk.Stack {
         comment: 'sonar master'
       }
     });
+
 
     //grant CloudFront access identity userid access to the s3 bucket
     bucket.grantRead(new iam.CanonicalUserPrincipal(
