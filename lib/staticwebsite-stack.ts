@@ -93,7 +93,7 @@ export class StaticwebsiteStack extends cdk.Stack {
                 cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS
             }
           ],
-          originPath: '/web/static',
+          originPath: '/static_website/sonar-master',
         }
       ]
     })
