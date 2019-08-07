@@ -1,11 +1,12 @@
 import cdk = require('@aws-cdk/core');
 import s3 = require('@aws-cdk/aws-s3');
-//import s3deploy = require('@aws-cdk/aws-s3-deployment');
+import s3deploy = require('@aws-cdk/aws-s3-deployment');
 import cloudfront = require('@aws-cdk/aws-cloudfront');
 import iam = require('@aws-cdk/aws-iam');
 //import cb = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import pipelineAction = require('@aws-cdk/aws-codepipeline-actions');
+//import cw = require('@aws-cdk/aws-cloudwatch');
 
 export class StaticwebsiteStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -17,12 +18,18 @@ export class StaticwebsiteStack extends cdk.Stack {
         websiteErrorDocument: '404.html'
       });
 
+    //temp bucket to see the difference between asset deploy and pipeline deploy
+    const tempbucket = new s3.Bucket(this, 'tempbucket',{
+        websiteIndexDocument: 'index.html',
+        websiteErrorDocument: '404.html'
+    });
+
     //deploy local web assets to s3 bucket; TODO replace with codebuild and codepipeline
-   // new s3deploy.BucketDeployment(this, 'deployWebsite', {
-   //   source: s3deploy.Source.asset('static_website/sonar-master'),
-   //   destinationBucket: bucket,
-   //   destinationKeyPrefix: 'web/static' 
-   // });
+   new s3deploy.BucketDeployment(this, 'deployWebsite', {
+      source: s3deploy.Source.asset('web/static'),
+      destinationBucket: tempbucket,
+      destinationKeyPrefix: 'web/static' 
+   });
 
     //create CodePipeline stages to deploy the static website from GitHub to S3
     //create the CodePipeline service instance
