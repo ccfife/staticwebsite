@@ -1,6 +1,5 @@
 import cdk = require('@aws-cdk/core');
 import s3 = require('@aws-cdk/aws-s3');
-import s3deploy = require('@aws-cdk/aws-s3-deployment');
 import cloudfront = require('@aws-cdk/aws-cloudfront');
 import iam = require('@aws-cdk/aws-iam');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
@@ -15,19 +14,6 @@ export class StaticwebsiteStack extends cdk.Stack {
         websiteIndexDocument: 'index.html',
         websiteErrorDocument: '404.html',
       });
-
-       //s3 bucket with support for website hosting
-    const otherbucket = new s3.Bucket(this,'otherbucket',{
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: '404.html',
-    });
-
-    //deploy local web assets to s3 bucket; TODO replace with codebuild and codepipeline
-   new s3deploy.BucketDeployment(this, 'deployWebsite', {
-      source: s3deploy.Source.asset('web/static'),
-      destinationBucket: otherbucket,
-      destinationKeyPrefix: 'web/static' 
-   });
 
     //create CodePipeline stages to deploy the static website from GitHub to S3
     //create the CodePipeline service instance
