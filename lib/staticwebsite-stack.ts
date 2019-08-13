@@ -3,10 +3,8 @@ import s3 = require('@aws-cdk/aws-s3');
 import s3deploy = require('@aws-cdk/aws-s3-deployment');
 import cloudfront = require('@aws-cdk/aws-cloudfront');
 import iam = require('@aws-cdk/aws-iam');
-//import cb = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import pipelineAction = require('@aws-cdk/aws-codepipeline-actions');
-//import cw = require('@aws-cdk/aws-cloudwatch');
 
 export class StaticwebsiteStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -15,19 +13,19 @@ export class StaticwebsiteStack extends cdk.Stack {
     //s3 bucket with support for website hosting
     const bucket = new s3.Bucket(this,'staticWebsite_v1',{
         websiteIndexDocument: 'index.html',
-        websiteErrorDocument: '404.html'
+        websiteErrorDocument: '404.html',
       });
 
-    //temp bucket to see the difference between asset deploy and pipeline deploy
-    const tempbucket = new s3.Bucket(this, 'tempbucket',{
-        websiteIndexDocument: 'index.html',
-        websiteErrorDocument: '404.html'
+       //s3 bucket with support for website hosting
+    const otherbucket = new s3.Bucket(this,'otherbucket',{
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: '404.html',
     });
 
     //deploy local web assets to s3 bucket; TODO replace with codebuild and codepipeline
    new s3deploy.BucketDeployment(this, 'deployWebsite', {
       source: s3deploy.Source.asset('web/static'),
-      destinationBucket: tempbucket,
+      destinationBucket: otherbucket,
       destinationKeyPrefix: 'web/static' 
    });
 
@@ -50,7 +48,7 @@ export class StaticwebsiteStack extends cdk.Stack {
       owner: 'ccfife',
       repo: 'staticwebsite',
       output: sourceOutput,
-      oauthToken: token
+      oauthToken: token,
     });
 
     pipeline.addStage({
@@ -62,7 +60,8 @@ export class StaticwebsiteStack extends cdk.Stack {
     const deployAction = new pipelineAction.S3DeployAction({
       actionName: 'S3Deploy',
       bucket: bucket,
-      input: sourceOutput
+      input: sourceOutput,
+      extract: true,
     });
 
     pipeline.addStage({
