@@ -1,6 +1,7 @@
 *.js
 *.d.ts
 node_modules
+#don't ignore anything in the web dir
 !web/
 
 # CDK asset staging directory
