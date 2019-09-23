@@ -24,6 +24,27 @@ test('check S3 bucket website configuration', () => {
      });
 });
 
+test('Check CodePipeline stages', () => {
+    const app = new App();
+    const site = new website.StaticwebsiteStack(app, 'testwebsite');
+
+    expect(site).toHaveResourceLike('AWS::CodePipeline::Pipeline', {
+        "Stages": [
+            { 
+                "Actions" : [
+                    {
+                        "Configuration": {
+                            "OAuthToken": "{{resolve:secretsmanager:ccfife_github:SecretString:GitHub::}}",
+                        }
+                    }
+                ],
+                "Name": "Source" 
+            },
+            { "Name": "Deploy" }
+        ],
+    });
+});
+
 test('Check CloudFront origin path config', () => {
     const app = new App();
     const site = new website.StaticwebsiteStack(app, 'testwebsite');
