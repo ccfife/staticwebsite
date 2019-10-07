@@ -42,6 +42,17 @@ export class StaticwebsiteStack extends cdk.Stack {
       actions: [sourceAction]
     })
 
+    
+    //Create a manual approval step
+    const approveAction = new pipelineAction.ManualApprovalAction({
+      actionName: 'Approve' 
+    });
+
+    pipeline.addStage({
+      stageName: 'APPROVE',
+      actions:[approveAction]
+    });
+    
     //create a new codepipeline DEPLOY stage
     const deployAction = new pipelineAction.S3DeployAction({
       actionName: 'S3Deploy',
