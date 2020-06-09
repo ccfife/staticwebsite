@@ -75,7 +75,6 @@ Object {
                   "PollForSourceChanges": false,
                   "Repo": "staticwebsite",
                 },
-                "InputArtifacts": Array [],
                 "Name": "GitHub_Source",
                 "OutputArtifacts": Array [
                   Object {
@@ -86,6 +85,27 @@ Object {
               },
             ],
             "Name": "Source",
+          },
+          Object {
+            "Actions": Array [
+              Object {
+                "ActionTypeId": Object {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Provider": "Manual",
+                  "Version": "1",
+                },
+                "Name": "Approve",
+                "RoleArn": Object {
+                  "Fn::GetAtt": Array [
+                    "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732",
+                    "Arn",
+                  ],
+                },
+                "RunOrder": 1,
+              },
+            ],
+            "Name": "APPROVE",
           },
           Object {
             "Actions": Array [
@@ -108,7 +128,6 @@ Object {
                   },
                 ],
                 "Name": "S3Deploy",
-                "OutputArtifacts": Array [],
                 "RoleArn": Object {
                   "Fn::GetAtt": Array [
                     "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
@@ -123,6 +142,38 @@ Object {
         ],
       },
       "Type": "AWS::CodePipeline::Pipeline",
+    },
+    "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::",
+                      Object {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":root",
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
     },
     "CDKpipelineArtifactsBucket41E5DE9A": Object {
       "DeletionPolicy": "Retain",
@@ -146,8 +197,22 @@ Object {
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "CDKpipelineArtifactsBucketEncryptionKeyAlias1119EF15": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "AliasName": "alias/codepipeline-testwebsitecdkpipelinece648ee2",
+        "TargetKeyId": Object {
+          "Fn::GetAtt": Array [
+            "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::KMS::Alias",
+      "UpdateReplacePolicy": "Delete",
+    },
     "CDKpipelineArtifactsBucketEncryptionKeyF46454F3": Object {
-      "DeletionPolicy": "Retain",
+      "DeletionPolicy": "Delete",
       "Properties": Object {
         "KeyPolicy": Object {
           "Statement": Array [
@@ -228,7 +293,7 @@ Object {
         },
       },
       "Type": "AWS::KMS::Key",
-      "UpdateReplacePolicy": "Retain",
+      "UpdateReplacePolicy": "Delete",
     },
     "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4": Object {
       "Properties": Object {
@@ -359,17 +424,7 @@ Object {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": Object {
-                "Service": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "codepipeline.",
-                      Object {
-                        "Ref": "AWS::URLSuffix",
-                      },
-                    ],
-                  ],
-                },
+                "Service": "codepipeline.amazonaws.com",
               },
             },
           ],
@@ -436,6 +491,16 @@ Object {
               "Effect": "Allow",
               "Resource": Object {
                 "Fn::GetAtt": Array [
+                  "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732",
+                  "Arn",
+                ],
+              },
+            },
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
                   "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
                   "Arn",
                 ],
@@ -477,7 +542,6 @@ Object {
     "cloudfrontCFDistribution0FC24C70": Object {
       "Properties": Object {
         "DistributionConfig": Object {
-          "CacheBehaviors": Array [],
           "DefaultCacheBehavior": Object {
             "AllowedMethods": Array [
               "GET",
@@ -488,6 +552,7 @@ Object {
               "GET",
               "HEAD",
             ],
+            "Compress": true,
             "ForwardedValues": Object {
               "Cookies": Object {
                 "Forward": "none",

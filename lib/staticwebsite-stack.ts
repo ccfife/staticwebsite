@@ -17,7 +17,7 @@ export class StaticwebsiteStack extends cdk.Stack {
 
     //create CodePipeline stages to deploy the static website from GitHub to S3
     //create the CodePipeline service instance
-    const pipeline = new codepipeline.Pipeline(this, 'CDKpipeline', {
+    const pipeline = new codepipeline.Pipeline(this, 'CDKStaticWebsitePipeline', {
       pipelineName: 'SonarMasterPipeline'
     });
     
@@ -41,17 +41,6 @@ export class StaticwebsiteStack extends cdk.Stack {
       stageName: 'Source',
       actions: [sourceAction]
     })
-
-    
-    //Create a manual approval step
-    const approveAction = new pipelineAction.ManualApprovalAction({
-      actionName: 'Approve' 
-    });
-
-    pipeline.addStage({
-      stageName: 'APPROVE',
-      actions:[approveAction]
-    });
     
     //create a new codepipeline DEPLOY stage
     const deployAction = new pipelineAction.S3DeployAction({
@@ -67,17 +56,10 @@ export class StaticwebsiteStack extends cdk.Stack {
     });
       
     //create CloudFront access identity
-    const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, 'BucketOrigin', {
-      cloudFrontOriginAccessIdentityConfig: {
-        comment: 'sonar master'
-      }
-    });
-
+    const origin = new cloudfront.OriginAccessIdentity(this, 'BucketOrigin');
 
     //grant CloudFront access identity userid access to the s3 bucket
-    bucket.grantRead(new iam.CanonicalUserPrincipal(
-      origin.attrS3CanonicalUserId
-    ));
+    bucket.grantRead(origin);
 
     //create cloudfront distribution
     const cdn = new cloudfront.CloudFrontWebDistribution(this, 'cloudfront', {
@@ -87,7 +69,7 @@ export class StaticwebsiteStack extends cdk.Stack {
         {
           s3OriginSource: {
             s3BucketSource: bucket,
-            originAccessIdentityId: origin.ref
+            originAccessIdentity: origin,
           },
           behaviors: [
             {
