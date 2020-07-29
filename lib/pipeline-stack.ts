@@ -42,7 +42,13 @@ export class PipelineStack extends cdk.Stack {
         }),
     });
 
-    pipeline.addApplicationStage(new StaticWebsiteStage(this, 'DevStageStack', {env: envUSA }));
+    pipeline.addApplicationStage(new StaticWebsiteStage(this, 'DevStageStack', {
+        env: envUSA 
+    }));
+
+    pipeline.addApplicationStage(new StaticWebsiteStage(this, 'TestStageStack', {
+        env: envEU
+    }));
 
   }
 }
