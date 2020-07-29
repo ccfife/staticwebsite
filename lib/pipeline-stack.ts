@@ -2,7 +2,7 @@ import cdk = require('@aws-cdk/core');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import pipelineAction = require('@aws-cdk/aws-codepipeline-actions');
 import cdkpipeline = require('@aws-cdk/pipelines');
-import { SimpleSynthAction } from '@aws-cdk/pipelines';
+import { SimpleSynthAction, ShellScriptAction } from '@aws-cdk/pipelines';
 import { StaticWebsiteStage } from '../lib/staticwebsite-stage';
 import { CodeBuildAction } from '@aws-cdk/aws-codepipeline-actions';
 
@@ -18,6 +18,8 @@ export class PipelineStack extends cdk.Stack {
 
     const sourceArtifact = new codepipeline.Artifact();
     const cloudAssemblyArtifact = new codepipeline.Artifact();
+    const integTestArtifact = new codepipeline.Artifact();
+
     const envUSA = { account: '033781032552', region: 'us-west-2'};
     const envEU = { account: '033781032552', region: 'eu-west-1'};
 
@@ -39,6 +41,8 @@ export class PipelineStack extends cdk.Stack {
         synthAction: SimpleSynthAction.standardNpmSynth({
             sourceArtifact,
             cloudAssemblyArtifact,
+            buildCommand: 'npm test'
+   
         }),
     });
 

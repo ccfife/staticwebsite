@@ -21,318 +21,178 @@ Object {
       },
     },
   },
+  "Parameters": Object {
+    "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50ArtifactHash846130E4": Object {
+      "Description": "Artifact hash for asset \\"4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50\\"",
+      "Type": "String",
+    },
+    "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50S3BucketB6159468": Object {
+      "Description": "S3 bucket for asset \\"4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50\\"",
+      "Type": "String",
+    },
+    "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50S3VersionKey2060CAC0": Object {
+      "Description": "S3 key for asset version \\"4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50\\"",
+      "Type": "String",
+    },
+    "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eArtifactHash5A93DDD1": Object {
+      "Description": "Artifact hash for asset \\"c4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093e\\"",
+      "Type": "String",
+    },
+    "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3Bucket2013C2DF": Object {
+      "Description": "S3 bucket for asset \\"c4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093e\\"",
+      "Type": "String",
+    },
+    "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3VersionKey4ABDA729": Object {
+      "Description": "S3 key for asset version \\"c4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093e\\"",
+      "Type": "String",
+    },
+  },
   "Resources": Object {
-    "BucketOrigin": Object {
+    "BucketOrigin15820FC1": Object {
       "Properties": Object {
         "CloudFrontOriginAccessIdentityConfig": Object {
-          "Comment": "sonar master",
+          "Comment": "Allows CloudFront to reach the bucket",
         },
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "CDKpipeline2E0BE889": Object {
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": Object {
       "DependsOn": Array [
-        "CDKpipelineRoleDefaultPolicy6C05FD8D",
-        "CDKpipelineRoleB4F4E9E9",
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
       ],
       "Properties": Object {
-        "ArtifactStore": Object {
-          "EncryptionKey": Object {
-            "Id": Object {
-              "Fn::GetAtt": Array [
-                "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
-                "Arn",
+        "Code": Object {
+          "S3Bucket": Object {
+            "Ref": "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50S3BucketB6159468",
+          },
+          "S3Key": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                Object {
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50S3VersionKey2060CAC0",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                Object {
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParameters4184245adc1f2ed71e1f0ae5719f8fd7f34324b750f1bf06b2fb5cf1f4014f50S3VersionKey2060CAC0",
+                        },
+                      ],
+                    },
+                  ],
+                },
               ],
-            },
-            "Type": "KMS",
+            ],
           },
-          "Location": Object {
-            "Ref": "CDKpipelineArtifactsBucket41E5DE9A",
-          },
-          "Type": "S3",
         },
-        "Name": "SonarMasterPipeline",
-        "RoleArn": Object {
+        "Handler": "index.handler",
+        "Role": Object {
           "Fn::GetAtt": Array [
-            "CDKpipelineRoleB4F4E9E9",
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
             "Arn",
           ],
         },
-        "Stages": Array [
-          Object {
-            "Actions": Array [
-              Object {
-                "ActionTypeId": Object {
-                  "Category": "Source",
-                  "Owner": "ThirdParty",
-                  "Provider": "GitHub",
-                  "Version": "1",
-                },
-                "Configuration": Object {
-                  "Branch": "master",
-                  "OAuthToken": "{{resolve:secretsmanager:ccfife_github:SecretString:GitHub::}}",
-                  "Owner": "ccfife",
-                  "PollForSourceChanges": false,
-                  "Repo": "staticwebsite",
-                },
-                "Name": "GitHub_Source",
-                "OutputArtifacts": Array [
-                  Object {
-                    "Name": "Artifact_Source_GitHub_Source",
-                  },
-                ],
-                "RunOrder": 1,
+        "Runtime": "python3.6",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "lambda.amazonaws.com",
               },
-            ],
-            "Name": "Source",
-          },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": Array [
           Object {
-            "Actions": Array [
-              Object {
-                "ActionTypeId": Object {
-                  "Category": "Approval",
-                  "Owner": "AWS",
-                  "Provider": "Manual",
-                  "Version": "1",
+            "Fn::Join": Array [
+              "",
+              Array [
+                "arn:",
+                Object {
+                  "Ref": "AWS::Partition",
                 },
-                "Name": "Approve",
-                "RoleArn": Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732",
-                    "Arn",
-                  ],
-                },
-                "RunOrder": 1,
-              },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
             ],
-            "Name": "APPROVE",
-          },
-          Object {
-            "Actions": Array [
-              Object {
-                "ActionTypeId": Object {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Provider": "S3",
-                  "Version": "1",
-                },
-                "Configuration": Object {
-                  "BucketName": Object {
-                    "Ref": "staticWebsitev1D351E58C",
-                  },
-                  "Extract": "true",
-                },
-                "InputArtifacts": Array [
-                  Object {
-                    "Name": "Artifact_Source_GitHub_Source",
-                  },
-                ],
-                "Name": "S3Deploy",
-                "RoleArn": Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
-                    "Arn",
-                  ],
-                },
-                "RunOrder": 1,
-              },
-            ],
-            "Name": "Deploy",
           },
         ],
       },
-      "Type": "AWS::CodePipeline::Pipeline",
-    },
-    "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732": Object {
-      "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:",
-                      Object {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
-                    ],
-                  ],
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
       "Type": "AWS::IAM::Role",
     },
-    "CDKpipelineArtifactsBucket41E5DE9A": Object {
-      "DeletionPolicy": "Retain",
-      "Properties": Object {
-        "BucketEncryption": Object {
-          "ServerSideEncryptionConfiguration": Array [
-            Object {
-              "ServerSideEncryptionByDefault": Object {
-                "KMSMasterKeyID": Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
-                    "Arn",
-                  ],
-                },
-                "SSEAlgorithm": "aws:kms",
-              },
-            },
-          ],
-        },
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "CDKpipelineArtifactsBucketEncryptionKeyAlias1119EF15": Object {
-      "DeletionPolicy": "Delete",
-      "Properties": Object {
-        "AliasName": "alias/codepipeline-testwebsitecdkpipelinece648ee2",
-        "TargetKeyId": Object {
-          "Fn::GetAtt": Array [
-            "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::KMS::Alias",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "CDKpipelineArtifactsBucketEncryptionKeyF46454F3": Object {
-      "DeletionPolicy": "Delete",
-      "Properties": Object {
-        "KeyPolicy": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "kms:Create*",
-                "kms:Describe*",
-                "kms:Enable*",
-                "kms:List*",
-                "kms:Put*",
-                "kms:Update*",
-                "kms:Revoke*",
-                "kms:Disable*",
-                "kms:Get*",
-                "kms:Delete*",
-                "kms:ScheduleKeyDeletion",
-                "kms:CancelKeyDeletion",
-                "kms:GenerateDataKey",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:",
-                      Object {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
-                    ],
-                  ],
-                },
-              },
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
-                "kms:Decrypt",
-                "kms:DescribeKey",
-                "kms:Encrypt",
-                "kms:ReEncrypt*",
-                "kms:GenerateDataKey*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineRoleB4F4E9E9",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
-                "kms:Decrypt",
-                "kms:DescribeKey",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::KMS::Key",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4": Object {
-      "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:",
-                      Object {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
-                    ],
-                  ],
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CDKpipelineDeployS3DeployCodePipelineActionRoleDefaultPolicy97623ACC": Object {
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
             Object {
               "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3Bucket2013C2DF",
+                      },
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:",
+                      Object {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      Object {
+                        "Ref": "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3Bucket2013C2DF",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
                 "s3:DeleteObject*",
                 "s3:PutObject*",
                 "s3:Abort*",
@@ -361,183 +221,75 @@ Object {
                 },
               ],
             },
-            Object {
-              "Action": Array [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineArtifactsBucket41E5DE9A",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "CDKpipelineArtifactsBucket41E5DE9A",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            Object {
-              "Action": Array [
-                "kms:Decrypt",
-                "kms:DescribeKey",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::GetAtt": Array [
-                  "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CDKpipelineDeployS3DeployCodePipelineActionRoleDefaultPolicy97623ACC",
+        "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
         "Roles": Array [
           Object {
-            "Ref": "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
+            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "CDKpipelineRoleB4F4E9E9": Object {
+    "DeployWebsiteCustomResourceD116527B": Object {
+      "DeletionPolicy": "Delete",
       "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": "codepipeline.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
+        "DestinationBucketKeyPrefix": "web/static",
+        "DestinationBucketName": Object {
+          "Ref": "staticWebsitev1D351E58C",
         },
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CDKpipelineRoleDefaultPolicy6C05FD8D": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-                "s3:PutObject*",
-                "s3:Abort*",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
+        "Prune": true,
+        "ServiceToken": Object {
+          "Fn::GetAtt": Array [
+            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+            "Arn",
+          ],
+        },
+        "SourceBucketNames": Array [
+          Object {
+            "Ref": "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3Bucket2013C2DF",
+          },
+        ],
+        "SourceObjectKeys": Array [
+          Object {
+            "Fn::Join": Array [
+              "",
+              Array [
                 Object {
-                  "Fn::GetAtt": Array [
-                    "CDKpipelineArtifactsBucket41E5DE9A",
-                    "Arn",
+                  "Fn::Select": Array [
+                    0,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3VersionKey4ABDA729",
+                        },
+                      ],
+                    },
                   ],
                 },
                 Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "CDKpipelineArtifactsBucket41E5DE9A",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
+                  "Fn::Select": Array [
+                    1,
+                    Object {
+                      "Fn::Split": Array [
+                        "||",
+                        Object {
+                          "Ref": "AssetParametersc4d53c2eeeab7a70aa1f2e51d05d89c5f3b10a8d9d14146ab6face142762093eS3VersionKey4ABDA729",
+                        },
+                      ],
+                    },
                   ],
                 },
               ],
-            },
-            Object {
-              "Action": Array [
-                "kms:Decrypt",
-                "kms:DescribeKey",
-                "kms:Encrypt",
-                "kms:ReEncrypt*",
-                "kms:GenerateDataKey*",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::GetAtt": Array [
-                  "CDKpipelineArtifactsBucketEncryptionKeyF46454F3",
-                  "Arn",
-                ],
-              },
-            },
-            Object {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::GetAtt": Array [
-                  "CDKpipelineAPPROVEApproveCodePipelineActionRole070FE732",
-                  "Arn",
-                ],
-              },
-            },
-            Object {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::GetAtt": Array [
-                  "CDKpipelineDeployS3DeployCodePipelineActionRole7D14C6B4",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "CDKpipelineRoleDefaultPolicy6C05FD8D",
-        "Roles": Array [
-          Object {
-            "Ref": "CDKpipelineRoleB4F4E9E9",
+            ],
           },
         ],
       },
-      "Type": "AWS::IAM::Policy",
-    },
-    "CDKpipelineSourceGitHubSourceWebhookResource2DBA157F": Object {
-      "Properties": Object {
-        "Authentication": "GITHUB_HMAC",
-        "AuthenticationConfiguration": Object {
-          "SecretToken": "{{resolve:secretsmanager:ccfife_github:SecretString:GitHub::}}",
-        },
-        "Filters": Array [
-          Object {
-            "JsonPath": "$.ref",
-            "MatchEquals": "refs/heads/{Branch}",
-          },
-        ],
-        "RegisterWithThirdParty": true,
-        "TargetAction": "GitHub_Source",
-        "TargetPipeline": Object {
-          "Ref": "CDKpipeline2E0BE889",
-        },
-        "TargetPipelineVersion": 1,
-      },
-      "Type": "AWS::CodePipeline::Webhook",
+      "Type": "Custom::CDKBucketDeployment",
+      "UpdateReplacePolicy": "Delete",
     },
     "cloudfrontCFDistribution0FC24C70": Object {
       "Properties": Object {
@@ -568,6 +320,8 @@ Object {
           "IPV6Enabled": true,
           "Origins": Array [
             Object {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
               "DomainName": Object {
                 "Fn::GetAtt": Array [
                   "staticWebsitev1D351E58C",
@@ -583,7 +337,7 @@ Object {
                     Array [
                       "origin-access-identity/cloudfront/",
                       Object {
-                        "Ref": "BucketOrigin",
+                        "Ref": "BucketOrigin15820FC1",
                       },
                     ],
                   ],
@@ -627,7 +381,7 @@ Object {
               "Principal": Object {
                 "CanonicalUser": Object {
                   "Fn::GetAtt": Array [
-                    "BucketOrigin",
+                    "BucketOrigin15820FC1",
                     "S3CanonicalUserId",
                   ],
                 },
