@@ -18,7 +18,7 @@ export class StaticwebsiteStack extends cdk.Stack {
     });
 
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-      sources: [s3deploy.Source.asset('./web')],
+      sources: [s3deploy.Source.asset('./web/static')],
       destinationBucket: bucket,
       destinationKeyPrefix: 'web/static'
     });
