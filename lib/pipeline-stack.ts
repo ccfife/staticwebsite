@@ -41,7 +41,7 @@ export class PipelineStack extends cdk.Stack {
         synthAction: SimpleSynthAction.standardNpmSynth({
             sourceArtifact,
             cloudAssemblyArtifact,
-            buildCommand: 'npm test'
+            buildCommand: 'npm run build && npm run test',
    
         }),
     });
