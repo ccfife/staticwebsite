@@ -1,48 +1,42 @@
-import cdk = require('@aws-cdk/core');
-import codepipeline = require('@aws-cdk/aws-codepipeline');
-import pipelineAction = require('@aws-cdk/aws-codepipeline-actions');
-import cdkpipeline = require('@aws-cdk/pipelines');
-import { SimpleSynthAction, ShellScriptAction } from '@aws-cdk/pipelines';
+import monocdk = require('monocdk-experiment');
+import { aws_codepipeline, pipelines, aws_codepipeline_actions } from 'monocdk-experiment';
 import { StaticWebsiteStage } from '../lib/staticwebsite-stage';
-import { CodeBuildAction } from '@aws-cdk/aws-codepipeline-actions';
 
-
-export class PipelineStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+export class PipelineStack extends monocdk.Stack {
+    constructor(scope: monocdk.Construct, id: string, props?: monocdk.StackProps) {
       super(scope, id, props);
 
     //read the GitHub access key from SecretValue using the 'GitHub' name/value pair
-    const token = cdk.SecretValue.secretsManager('ccfife_github', {
+    const token = monocdk.SecretValue.secretsManager('ccfife_github', {
         jsonField: 'GitHub'
     });
 
-    const sourceArtifact = new codepipeline.Artifact();
-    const cloudAssemblyArtifact = new codepipeline.Artifact();
-    const integTestArtifact = new codepipeline.Artifact();
+    const sourceArtifact = new aws_codepipeline.Artifact();
+    const cloudAssemblyArtifact = new aws_codepipeline.Artifact();
+    const integTestArtifact = new aws_codepipeline.Artifact();
 
     const envUSA = { account: '033781032552', region: 'us-west-2'};
     const envEU = { account: '033781032552', region: 'eu-west-1'};
 
     //create a CDK Pipeline to deploy the static website
 
-    const pipeline = new cdkpipeline.CdkPipeline(this, 'Pipeline', {
+    const pipeline = new pipelines.CdkPipeline(this, 'Pipeline', {
         pipelineName: 'NewSonarMasterPipeline',
         cloudAssemblyArtifact,
 
-        sourceAction: new pipelineAction.GitHubSourceAction({
+        sourceAction: new aws_codepipeline_actions.GitHubSourceAction({
             actionName: 'GitHub_Source',
             owner: 'ccfife',
             repo: 'staticwebsite',
             output: sourceArtifact,
             oauthToken: token,
-            trigger: pipelineAction.GitHubTrigger.WEBHOOK
+            trigger: aws_codepipeline_actions.GitHubTrigger.WEBHOOK
         }), 
 
-        synthAction: SimpleSynthAction.standardNpmSynth({
+        synthAction: pipelines.SimpleSynthAction.standardNpmSynth({
             sourceArtifact,
             cloudAssemblyArtifact,
-            buildCommand: 'npm run build && npm run test',
-   
+            buildCommand: 'npm run build && npm run test',   
         }),
     });
 
