@@ -36,7 +36,7 @@ export class PipelineStack extends monocdk.Stack {
         synthAction: pipelines.SimpleSynthAction.standardNpmSynth({
             sourceArtifact,
             cloudAssemblyArtifact,
-            buildCommand: 'npm run build && npm run test',   
+            buildCommand: 'npm run build',   
         }),
     });
 
