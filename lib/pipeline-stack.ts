@@ -1,52 +1,47 @@
-import monocdk = require('monocdk-experiment');
-import { aws_codepipeline, pipelines, aws_codepipeline_actions } from 'monocdk-experiment';
+import { SecretValue } from '@aws-cdk/core';
+import cdk = require('@aws-cdk/core');
+import {CodePipeline, CodePipelineSource, ShellStep} from '@aws-cdk/pipelines';
 import { StaticWebsiteStage } from '../lib/staticwebsite-stage';
 
-export class PipelineStack extends monocdk.Stack {
-    constructor(scope: monocdk.Construct, id: string, props?: monocdk.StackProps) {
+export class PipelineStack extends cdk.Stack {
+    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
       super(scope, id, props);
 
-    //read the GitHub access key from SecretValue using the 'GitHub' name/value pair
-    const token = monocdk.SecretValue.secretsManager('ccfife_github', {
-        jsonField: 'GitHub'
-    });
+        //read the GitHub access key from SecretValue using the 'GitHub' name/value pair
+        const token = SecretValue.secretsManager('ccfife_github', {
+            jsonField: 'GitHub'
+        });
+        //use the token to download the source from GitHub
+        const source = CodePipelineSource.gitHub('ccfife/staticwebsite', 'master', {
+            authentication: token
+        });
 
-    const sourceArtifact = new aws_codepipeline.Artifact();
-    const cloudAssemblyArtifact = new aws_codepipeline.Artifact();
-    const integTestArtifact = new aws_codepipeline.Artifact();
+        //define target environments for application 
+        const envUSA = { account: '033781032552', region: 'us-west-2'};
+        const envEU = { account: '033781032552', region: 'eu-west-1'};
 
-    const envUSA = { account: '033781032552', region: 'us-west-2'};
-    const envEU = { account: '033781032552', region: 'eu-west-1'};
+        //create a CDK Pipeline to deploy the static website
 
-    //create a CDK Pipeline to deploy the static website
+        const pipeline = new CodePipeline(this, 'Pipeline', {
+            pipelineName: 'StaticWebsitePipeline',
+            synth: new ShellStep('Synth', {
+                input: source,
+                commands: [
+                    'npm ci',
+                    'npm run build',
+                    'npx cdk synth'
+                ],
+            }),
+        });
 
-    const pipeline = new pipelines.CdkPipeline(this, 'Pipeline', {
-        pipelineName: 'NewSonarMasterPipeline',
-        cloudAssemblyArtifact,
+        pipeline.addStage(new StaticWebsiteStage(this, 'USA', {
+            env: envUSA
+        }));
 
-        sourceAction: new aws_codepipeline_actions.GitHubSourceAction({
-            actionName: 'GitHub_Source',
-            owner: 'ccfife',
-            repo: 'staticwebsite',
-            output: sourceArtifact,
-            oauthToken: token,
-            trigger: aws_codepipeline_actions.GitHubTrigger.WEBHOOK
-        }), 
+        //pipeline.addStage(new StaticWebsiteStage(this, 'EU', {
+        //    env: envEU
+        //}));
 
-        synthAction: pipelines.SimpleSynthAction.standardNpmSynth({
-            sourceArtifact,
-            cloudAssemblyArtifact,
-            buildCommand: 'npm run build',   
-        }),
-    });
 
-    pipeline.addApplicationStage(new StaticWebsiteStage(this, 'DevStageStack', {
-        env: envUSA 
-    }));
-
-    pipeline.addApplicationStage(new StaticWebsiteStage(this, 'TestStageStack', {
-        env: envEU
-    }));
-
-  }
+    }
 }

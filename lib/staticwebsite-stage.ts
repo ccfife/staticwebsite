@@ -1,4 +1,4 @@
-import { CfnOutput, Construct, Stage, StageProps } from 'monocdk-experiment';
+import { CfnOutput, Construct, Stage, StageProps } from '@aws-cdk/core';
 import { StaticwebsiteStack } from '../lib/staticwebsite-stack';
 
 export class StaticWebsiteStage extends Stage {

@@ -1,6 +1,6 @@
 
-import {expect as expectCDK, haveResource, haveResourceLike, SynthUtils} from '@monocdk-experiment/assert';
-import {Stack, App} from 'monocdk-experiment';
+import {expect as expectCDK, haveResource, haveResourceLike, SynthUtils} from '@aws-cdk/assert';
+import {Stack, App} from '@aws-cdk/core';
 import website = require('../lib/staticwebsite-stack');
 
 test('static website infra has not changed', () => {
