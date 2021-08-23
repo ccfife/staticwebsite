@@ -38,9 +38,9 @@ export class PipelineStack extends cdk.Stack {
             env: envUSA
         }));
 
-        //pipeline.addStage(new StaticWebsiteStage(this, 'EU', {
-        //    env: envEU
-        //}));
+        pipeline.addStage(new StaticWebsiteStage(this, 'EU', {
+            env: envEU
+        }));
 
 
     }
